@@ -3,6 +3,11 @@ package com.rpg.kata
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
+/**
+  * Created by aban.m on 8/28/2017.
+  */
+
+
 object CharacterBehaviour {
 
   def damageToCharacters(physicalCharacter: PhysicalCharacter, health: ChangeHealth): Future[PhysicalCharacter] = {

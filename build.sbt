@@ -65,7 +65,7 @@ lazy val commonSettings = Seq(
   },
   pomIncludeRepository := { _ => false },
   pomExtra in ThisBuild := (
-    <url>https://github.com/phil-rice/PactDemo</url>
+    <url>https://github.com/abanmitra</url>
       <licenses>
         <license>
           <name>BSD-style</name>
@@ -74,14 +74,13 @@ lazy val commonSettings = Seq(
         </license>
       </licenses>
       <scm>
-        <url>https://github.com/phil-rice/PactDemo.git</url>
-        <connection>https://github.com/phil-rice/PactDemo.git</connection>
+        <url>https://github.com/abanmitra/RPGKata.git</url>
+        <connection>https://github.com/abanmitra/RPGKata.git</connection>
       </scm>
       <developers>
         <developer>
-          <id>phil.rice</id>
-          <name>Phil Rice</name>
-          <url>www.validoc.org</url>
+          <id>aban.mitra</id>
+          <name>Aban Mitra</name>
         </developer>
       </developers>),
   publishArtifact in Test := false

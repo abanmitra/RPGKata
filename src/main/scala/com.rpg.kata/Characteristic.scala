@@ -3,6 +3,10 @@ package com.rpg.kata
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
+/**
+  * Created by aban.m on 8/28/2017.
+  */
+
 trait DamageToCharacter[T, P] extends ((T, P) => Future[P])
 
 trait HealToCharacter[T, P] extends ((T, P) => Future[P])

@@ -1,93 +1,46 @@
 package com.rpg.kata
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Await, Future}
+import scala.language.postfixOps
+import scala.concurrent.duration._
 
 /**
   * Created by aban.m on 8/28/2017.
   */
 
-
 object CharacterBehaviour {
 
-  def damageToCharacters(physicalCharacter: PhysicalCharacter, health: ChangeHealth): Future[PhysicalCharacter] = {
+  def damage(health: ChangeHealth)(physicalCharacter: PhysicalCharacter): Future[PhysicalCharacter] = {
     physicalCharacter processDamageToCharacters(health, physicalCharacter)
   }
 
-  def healToCharacter(physicalCharacter: PhysicalCharacter, health: ChangeHealth): Future[PhysicalCharacter] = {
+  def heal(health: ChangeHealth)(physicalCharacter: PhysicalCharacter): Future[PhysicalCharacter] = {
     physicalCharacter processHealToCharacter(health, physicalCharacter)
   }
 
 }
-
 
 object CharacterInAction {
 
   def main(args: Array[String]): Unit = {
 
     import CharacterBehaviour._
+    import MyArrow._
 
     val char = PhysicalCharacter("PERSON")
 
-    val goodHealth = ChangeHealth("PERSON", 100)
-    val badHealth = ChangeHealth("PERSON", 200)
+    val goodHealth100 = ChangeHealth("PERSON", 100)
+    val badHealth100 = ChangeHealth("PERSON", 100)
+    val badHealth800 = ChangeHealth("PERSON", 800)
 
-    val change1: Future[PhysicalCharacter] = damageToCharacters(char, badHealth)
+    val applyTooLossDamage =
+      damage(badHealth100) _  ~> damage(badHealth100) _  ~>  damage(badHealth100) _ ~> heal(goodHealth100) _ ~> heal(goodHealth100) _ ~> damage(badHealth800) _ ~> heal(goodHealth100) _ ~> damage(badHealth800) _ ~> heal(goodHealth100) _
 
-    change1.onSuccess({
-      case result =>
-        println(s"${result.name} :: ${result.health}\n\n")
-        val change2 = damageToCharacters(result, badHealth)
+    val duration = Duration(5, "millis")
+    val finalChar: PhysicalCharacter = Await.result(applyTooLossDamage(char),duration)
 
-        change2.onComplete({
-          case result =>
-            println("*")
-            println(s"${result.get.name} :: ${result.get.health}\n\n")
-            val change3 = damageToCharacters(result.get, badHealth)
-
-            change3.onComplete({
-              case result =>
-                println("*")
-                println(s"${result.get.name} :: ${result.get.health}\n\n")
-                val change4 = healToCharacter(result.get, goodHealth)
-
-                change4.onComplete({
-                  case result =>
-                    println("*")
-                    println(s"${result.get.name} :: ${result.get.health}\n\n")
-                    val change5 = healToCharacter(result.get, goodHealth)
-
-                    change5.onComplete({
-                      case result =>
-
-                        val veryBadHealth = ChangeHealth("PERSON", 800)
-                        println("*")
-                        println(s"${result.get.name} :: ${result.get.health}\n\n")
-                        val change6 = damageToCharacters(result.get, veryBadHealth)
-
-                        change6.onComplete({
-                          case result =>
-                            val recoverHealth = ChangeHealth("PERSON", 1000)
-                            println("*")
-                            println(s"${result.get.name} :: ${result.get.health}\n\n")
-                            healToCharacter(result.get, recoverHealth)
-                        })
-                    })
-                })
-            })
-        })
-    })
-
-    /*val change2 = damageToCharacters(change1, badHealth)
-    val change3 = damageToCharacters(change2, badHealth)
-    val change4 = healToCharacter(change3, goodHealth)
-    val change5 = healToCharacter(change4, goodHealth)
-
-    val veryBadHealth = ChangeHealth("PERSON", 800)
-    val change6 = damageToCharacters(change5, veryBadHealth)
-
-    val recoverHealth = ChangeHealth("PERSON", 1000)
-    healToCharacter(change6, recoverHealth)*/
+    println("\nFinal Status....")
+    Character.printStatusAfterEffect(finalChar)
   }
 
 }

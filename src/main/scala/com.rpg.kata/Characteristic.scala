@@ -7,6 +7,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Created by aban.m on 8/28/2017.
   */
 
+trait MyArrow {
+
+  implicit class FutureArrow[T, T1](fn1: T => Future[T1]) {
+    def ~>[T2](fn2 : T1 => Future[T2]): (T) => Future[T2] = {
+      t: T => fn1(t).flatMap(fn2)
+    }
+  }
+
+}
+object MyArrow extends MyArrow
+
 trait DamageToCharacter[T, P] extends ((T, P) => Future[P])
 
 trait HealToCharacter[T, P] extends ((T, P) => Future[P])
@@ -75,14 +86,14 @@ object Character {
   }
 
   def printStatusBeforeEffect(cChar: ChangeHealth, pChar: PhysicalCharacter) : Unit = {
-    println(s"Before effect to Character, Character => Name: ${pChar.name}, Health: ${pChar.health}, Level: ${pChar.level}, Alive: ${pChar.alive}")
-    println(s"Change Health, Character => Name: ${cChar.name}, Effect Health: ${cChar.effectHealthAmount}")
+    println(s"Before effect => Name: ${pChar.name}, Health: ${pChar.health}, Level: ${pChar.level}, Alive: ${pChar.alive}")
+    println(s"Change Health => Name: ${cChar.name}, Health: ${cChar.effectHealthAmount}")
     println()
   }
 
   def printStatusAfterEffect(pChar: PhysicalCharacter) : Unit = {
-    println(s"After effect to Character, Character => Name: ${pChar.name}, Health: ${pChar.health}, Level: ${pChar.level}, Alive: ${pChar.alive}")
-    println()
+    println(s"After effect => Name: ${pChar.name}, Health: ${pChar.health}, Level: ${pChar.level}, Alive: ${pChar.alive}")
+    println("--------------------------------------------------")
   }
 
 }

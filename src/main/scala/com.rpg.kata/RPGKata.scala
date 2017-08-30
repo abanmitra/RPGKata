@@ -33,11 +33,11 @@ object CharacterInAction {
     val badHealth100 = ChangeHealth("PERSON", 100)
     val badHealth800 = ChangeHealth("PERSON", 800)
 
-    val applyTooLossDamage =
+    val applyLossAndDamageAction =
       damage(badHealth100) _  ~> damage(badHealth100) _  ~>  damage(badHealth100) _ ~> heal(goodHealth100) _ ~> heal(goodHealth100) _ ~> damage(badHealth800) _ ~> heal(goodHealth100) _ ~> damage(badHealth800) _ ~> heal(goodHealth100) _
 
     val duration = Duration(5, "millis")
-    val finalChar: PhysicalCharacter = Await.result(applyTooLossDamage(char),duration)
+    val finalChar: PhysicalCharacter = Await.result(applyLossAndDamageAction(char),duration)
 
     println("\nFinal Status....")
     Character.printStatusAfterEffect(finalChar)

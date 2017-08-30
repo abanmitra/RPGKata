@@ -7,17 +7,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Created by aban.m on 8/28/2017.
   */
 
-trait MyArrow {
-
-  implicit class FutureArrow[T, T1](fn1: T => Future[T1]) {
-    def ~>[T2](fn2 : T1 => Future[T2]): (T) => Future[T2] = {
-      t: T => fn1(t).flatMap(fn2)
-    }
-  }
-
-}
-object MyArrow extends MyArrow
-
 trait DamageToCharacter[T, P] extends ((T, P) => Future[P])
 
 trait HealToCharacter[T, P] extends ((T, P) => Future[P])

@@ -11,6 +11,8 @@ trait DamageToCharacter[T, P] extends ((T, P) => Future[P])
 
 trait HealToCharacter[T, P] extends ((T, P) => Future[P])
 
+//trait ProfileCharacter[T] extends (T => Future[T])
+
 trait Character
 
 case class ChangeHealth(name: String, effectHealthAmount: Int) extends Character
@@ -28,6 +30,13 @@ case class PhysicalCharacter(name: String, health: Int = 1000, level: Int = 1, a
 
 
 object Character {
+
+  /*implicit object profileCharacter extends  ProfileCharacter[PhysicalCharacter] {
+    override def apply(pChar: PhysicalCharacter): Future[PhysicalCharacter] = {
+      printStatusAfterEffect(pChar)
+      Future{pChar}
+    }
+  }*/
 
   implicit object damageToCharacters extends DamageToCharacter[ChangeHealth, PhysicalCharacter] {
     override def apply(cChar: ChangeHealth, pChar: PhysicalCharacter): Future[PhysicalCharacter] = {

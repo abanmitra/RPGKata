@@ -14,13 +14,15 @@ import scala.concurrent.duration._
 trait MyArrow {
 
   implicit class FutureArrow[T, T1](fn1: T => Future[T1]) {
-    def ~>[T2](fn2 : T1 => Future[T2]): (T) => Future[T2] = {
+    def andThen[T2](fn2 : T1 => Future[T2]): (T) => Future[T2] = {
       t: T => fn1(t).flatMap(fn2)
     }
   }
 }
 
 object MyArrow extends MyArrow
+
+
 
 //trait Profiling[T] extends ((T) => Future[T])
 
@@ -71,17 +73,17 @@ object CharacterInAction {
 
     val masiveDamage = damage(badHealth800) _
 
-    val doubleDamageWith100 = damage(badHealth100) _  ~> damage(badHealth100) _
+    val doubleDamageWith100 = damage(badHealth100) _  andThen damage(badHealth100) _
 
-    val doubleHealWith100 = heal(goodHealth100) _  ~>  heal(goodHealth100) _
+    val doubleHealWith100 = heal(goodHealth100) _  andThen  heal(goodHealth100) _
 
-    val damageAndThenHeal100 = damage(badHealth100) _  ~>  heal(goodHealth100) _
+    val damageAndThenHeal100 = damage(badHealth100) _  andThen  heal(goodHealth100) _
 
-    val healAndThenDamage100 = heal(goodHealth100) _ ~> damage(badHealth100) _
+    val healAndThenDamage100 = heal(goodHealth100) _ andThen damage(badHealth100) _
 
     //val charEffect = new Profile(doubleDamageWith100) ~> damageWith100 ~> new Profile(doubleHealWith100) ~> masiveDamage ~> healWith100 ~> masiveDamage ~> healWith100
     //val charEffect = profile ~> doubleDamageWith100 ~> damageWith100 ~> profile ~> doubleHealWith100 ~> masiveDamage ~> healWith100 ~> profile ~> masiveDamage ~> healWith100
-    val charEffect = profile(doubleDamageWith100) ~> damageWith100 ~> profile(doubleHealWith100) ~> masiveDamage ~> healWith100 ~> profile(masiveDamage) ~> healWith100
+    val charEffect = profile(doubleDamageWith100) andThen damageWith100 andThen profile(doubleHealWith100) andThen masiveDamage andThen healWith100 andThen profile(masiveDamage) andThen healWith100
 
     val duration = Duration(20, "millis")
     val finalChar: PhysicalCharacter = Await.result(charEffect(char),duration)

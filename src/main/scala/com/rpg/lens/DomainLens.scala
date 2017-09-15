@@ -58,6 +58,12 @@ object BillingInfoService {
       isAddressConfirmed = newAddress.isAddressConfirmed
     ))
   }
+
+  def displayAddress(address: List[Address]) = {
+    for(ad <- address) {
+      println(s"House No: ${ad.houseNo}, Street: ${ad.street}, Confiurmed Address: ${ad.isAddressConfirmed}")
+    }
+  }
 }
 
 
@@ -73,9 +79,12 @@ object ProcessDomain {
 
     val city = City("kolkata")
     val country = Country("INDIA")
-    val address1 = Address("123", "Street1", city, country)
-    val address2 = Address("321", "Street123", city, country)
-    val addresses = List(address1,address2)
+    val address1 = Address("3322", "Street - 3322", city, country)
+    val address2 = Address("5544", "Street - 5544", city, country)
+    val address3 = Address("1122", "Street - 1122", city, country)
+    val address4 = Address("2233", "Street - 2233", city, country)
+    val address5 = Address("4455", "Street - 4455", city, country)
+    val addresses = List(address1,address2,address3,address4,address5)
     val billingInfo = BillingInfo("bill1",addresses)
 
     val userId = UserId(100)
@@ -92,19 +101,18 @@ object ProcessDomain {
 
     println("\n\n")
 
+
+    import BillingInfoService._
+
     val newAddress = Address("990099", "Some Random Street", city, country, true)
     println("Before update address....\n")
 
-    for(ad <- newUser.billingInfo.addresses) {
-      println(s"House No: ${ad.houseNo}, Street: ${ad.street}, Confiurmed Address: ${ad.isAddressConfirmed}")
-    }
+    displayAddress(newUser.billingInfo.addresses)
 
-    import BillingInfoService._
-    val newUserWithUpdateAddress: UserInfo = updateAddress(user, 1, newAddress)
+    // Last element update
+    val newUserWithUpdateAddress: UserInfo = updateAddress(user, newUser.billingInfo.addresses.size-1, newAddress)
 
     println("\n After update address....\n")
-    for(ad <- newUserWithUpdateAddress.billingInfo.addresses) {
-      println(s"House No: ${ad.houseNo}, Street: ${ad.street}, Confiurmed Address: ${ad.isAddressConfirmed}")
-    }
+    displayAddress(newUserWithUpdateAddress.billingInfo.addresses)
   }
 }

@@ -45,18 +45,18 @@ object BillingInfoService {
   val addressAgainstBillingInfo: DomainLines[BillingInfo, List[Address]] =
     DomainLines[BillingInfo, List[Address]] ((billing, adrss) => billing.copy(addresses = adrss), _.addresses)
 
-  def updateAddress(user: UserInfo, updateAddressInfo: Address) = {
 
-    /*********************************************************
-      * It return new update address info, not UserInfo.
-      *********************************************************/
-    (billingInfoAgainstUser =>= addressAgainstBillingInfo) get(user) updated(0,updateAddressInfo)
+  def listToItem[Address](n: Int): DomainLines[List[Address], Address] =
+    DomainLines[List[Address], Address] ((addressList, updateAddress) => addressList.updated(n, updateAddress), _.apply(n))
 
-    /********************************************************
-      * Not able to call transformation function -- ?????
-      ********************************************************/
-    //(billingInfoAgainstUser =>= addressAgainstBillingInfo) transformation (user, user.billingInfo.addresses.updated(0,updateAddressInfo))
-
+  def updateAddress(user: UserInfo, nthItem: Int, newAddress : Address): UserInfo = {
+    (billingInfoAgainstUser =>= addressAgainstBillingInfo =>= listToItem(nthItem)) transformation(user, _.copy(
+      houseNo = newAddress.houseNo,
+      street = newAddress.street,
+      city = newAddress.city,
+      country = newAddress.country,
+      isAddressConfirmed = newAddress.isAddressConfirmed
+    ))
   }
 }
 
@@ -73,8 +73,8 @@ object ProcessDomain {
 
     val city = City("kolkata")
     val country = Country("INDIA")
-    val address1 = Address("123", "Street1", city, country, true)
-    val address2 = Address("321", "Street123", city, country, true)
+    val address1 = Address("123", "Street1", city, country)
+    val address2 = Address("321", "Street123", city, country)
     val addresses = List(address1,address2)
     val billingInfo = BillingInfo("bill1",addresses)
 
@@ -90,10 +90,21 @@ object ProcessDomain {
     println("After Update rating...")
     display(newUser)
 
-    val newAddress = Address("99999", "ROAD - 007", city, country, true)
+    println("\n\n")
 
-    // Write a function that confirms the first address - ????
+    val newAddress = Address("990099", "Some Random Street", city, country, true)
+    println("Before update address....\n")
+
+    for(ad <- newUser.billingInfo.addresses) {
+      println(s"House No: ${ad.houseNo}, Street: ${ad.street}, Confiurmed Address: ${ad.isAddressConfirmed}")
+    }
+
     import BillingInfoService._
-    val address: List[Address] = updateAddress(user, newAddress)
+    val newUserWithUpdateAddress: UserInfo = updateAddress(user, 1, newAddress)
+
+    println("\n After update address....\n")
+    for(ad <- newUserWithUpdateAddress.billingInfo.addresses) {
+      println(s"House No: ${ad.houseNo}, Street: ${ad.street}, Confiurmed Address: ${ad.isAddressConfirmed}")
+    }
   }
 }

@@ -15,7 +15,7 @@ trait Character
 
 case class ChangeHealth(name: String, effectHealthAmount: Int) extends Character
 
-case class PhysicalCharacter(name: String, health: Int = 1000, level: Int = 1, alive: Boolean = true) extends Character {
+case class PhysicalCharacter(name: String, health: Int = 1000, level: Int = 1, alive: Boolean = true, noOfHeal: Int = 0, noOfDamage: Int = 0) extends Character {
 
   def processDamageToCharacters(changeHealth: ChangeHealth, character: PhysicalCharacter)(implicit damageCharacters: DamageToCharacter[ChangeHealth, PhysicalCharacter]): Future[PhysicalCharacter] = {
     damageCharacters(changeHealth, character)
@@ -28,23 +28,22 @@ case class PhysicalCharacter(name: String, health: Int = 1000, level: Int = 1, a
 
 
 object Character {
-
   implicit object damageToCharacters extends DamageToCharacter[ChangeHealth, PhysicalCharacter] {
-    override def apply(cChar: ChangeHealth, pChar: PhysicalCharacter): Future[PhysicalCharacter] = {
+    override def apply(cChar: ChangeHealth, pChar: PhysicalCharacter) : Future[PhysicalCharacter] = {
 
-      printStatusBeforeEffect(cChar, pChar)
-      println(s"Process -> Damage health...")
+      //printStatusBeforeEffect(cChar, pChar)
+      //println(s"Process -> Damage health...")
       val char: PhysicalCharacter = pChar.name match {
         case cChar.name =>
           pChar.health match {
             case x if (x == 0 || (x > 0 && cChar.effectHealthAmount > pChar.health)) =>
-              PhysicalCharacter(cChar.name, 0, pChar.level, false)
+              PhysicalCharacter(cChar.name, 0, pChar.level, false, pChar.noOfHeal, pChar.noOfDamage + 1)
             case _ =>
-              PhysicalCharacter(cChar.name, pChar.health - cChar.effectHealthAmount, pChar.level, true)
+              PhysicalCharacter(cChar.name, pChar.health - cChar.effectHealthAmount, pChar.level, true, pChar.noOfHeal, pChar.noOfDamage + 1)
           }
         case _ => pChar
       }
-      printStatusAfterEffect(char)
+      //printStatusAfterEffect(char)
       Future{char}
 
     }
@@ -53,22 +52,22 @@ object Character {
   implicit object healToCharacter extends HealToCharacter[ChangeHealth, PhysicalCharacter] {
     override def apply(cChar: ChangeHealth, pChar: PhysicalCharacter): Future[PhysicalCharacter] = {
 
-      printStatusBeforeEffect(cChar, pChar)
-      println(s"Process -> Heal health...")
+      //printStatusBeforeEffect(cChar, pChar)
+      //println(s"Process -> Heal health...")
       val char = pChar.name match {
         case cChar.name =>
           pChar.alive match {
             case true => {
               if (pChar.health + cChar.effectHealthAmount >= 1000)
-                PhysicalCharacter(cChar.name, 1000, pChar.level, true)
+                PhysicalCharacter(cChar.name, 1000, pChar.level, true, pChar.noOfHeal + 1, pChar.noOfDamage)
               else
-                PhysicalCharacter(cChar.name, pChar.health + cChar.effectHealthAmount, pChar.level, true)
+                PhysicalCharacter(cChar.name, pChar.health + cChar.effectHealthAmount, pChar.level, true, pChar.noOfHeal + 1, pChar.noOfDamage)
             }
             case false => pChar
           }
         case _ => pChar
       }
-      printStatusAfterEffect(char)
+      //printStatusAfterEffect(char)
       Future{char}
 
     }

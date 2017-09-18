@@ -40,6 +40,8 @@ object CharacterInAction {
     import CharacterBehaviour._
     import MyArrow._
     import ProfileService._
+    import LogService._
+    import MetricsService._
 
     val char = PhysicalCharacter("PERSON")
 
@@ -59,13 +61,23 @@ object CharacterInAction {
 
     val damageAndThenHeal100 = damage(badHealth100) _ ~> heal(goodHealth100) _
 
-    val healAndThenDamage100 = heal(goodHealth100) _ ~> damage(badHealth100) _
+    val healAndThenDamage100: (PhysicalCharacter) => Future[PhysicalCharacter] = heal(goodHealth100) _ ~> damage(badHealth100) _
 
     // This is not the proper way to implement. Herw we use ~> concept
     val tmp: Future[PhysicalCharacter] = damageWith100(char).flatMap(damageWith100)
 
-    //    val charEffect = profile(doubleDamageWith100) ~> damageWith100 ~> profile(damageAndThenHeal100) ~> profile(healAndThenDamage100) ~> profile(doubleHealWith100) ~> massiveDamage ~> healWith100 ~> profile(massiveDamage) ~> healWith100
-    val charEffect = doubleDamageWith100 ~> damageWith100 ~> damageAndThenHeal100 ~> healAndThenDamage100
+    val charEffect =
+      metrics(logging(profile(doubleDamageWith100))) ~>
+        metrics(logging(profile(damageWith100))) ~>
+        metrics(logging(profile(damageAndThenHeal100))) ~>
+        metrics(logging(profile(healAndThenDamage100))) ~>
+        metrics(logging(profile(doubleHealWith100))) ~>
+        metrics(logging(profile(massiveDamage))) ~>
+        metrics(logging(profile(healWith100))) ~>
+        metrics(logging(profile(massiveDamage))) ~>
+        metrics(logging(profile(healWith100)))
+
+    // val charEffect = doubleDamageWith100 ~> damageWith100 ~> damageAndThenHeal100 ~> healAndThenDamage100
 
 
     val duration = Duration(500, "millis")

@@ -1,6 +1,9 @@
 package com.rpg.kata
 
+import java.text.MessageFormat
 import java.util.Date
+import java.util.regex.Pattern
+
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -82,4 +85,30 @@ class MetricsService[T, R](fn: T =>  Future[R]) (implicit ts: TimeService, df: D
     }
     fn(t)
   }
+}
+
+/***********************************************************************************/
+
+trait LogData[T] extends (T => String)
+
+object LogData {
+  implicit def defaultLogData[T] = new LogData[T] {
+    override def apply(value: T) = value.toString
+  }
+}
+
+class Logging[T, R] (pattern: String, fn: T => Future[R]) (implicit
+                                                           logDataT: LogData[T],
+                                                           logDataR: LogData[R],
+                                                           ts: TimeService,
+                                                           df: DateFormatting) extends (T => Future[R]) {
+  override def apply(t: T) = {
+    val res: Future[R] = fn(t)
+    println(s"${df.format(ts.currentTime())}[INFO] " + MessageFormat.format(pattern,t, res.map(logDataR)))
+    res
+  }
+}
+
+object Logging {
+  def apply[T: LogData, R: LogData] (pattern: String, fn: T => Future[R]) = new Logging(pattern,fn)
 }

@@ -66,8 +66,7 @@ object CharacterInAction {
     // This is not the proper way to implement. Herw we use ~> concept
     val tmp: Future[PhysicalCharacter] = damageWith100(char).flatMap(damageWith100)
 
-    val charEffect =
-      metrics(logging(profile(doubleDamageWith100))) ~>
+    /*val charEffect = metrics(logging(profile(doubleDamageWith100))) ~>
         metrics(logging(profile(damageWith100))) ~>
         metrics(logging(profile(damageAndThenHeal100))) ~>
         metrics(logging(profile(healAndThenDamage100))) ~>
@@ -75,12 +74,14 @@ object CharacterInAction {
         metrics(logging(profile(massiveDamage))) ~>
         metrics(logging(profile(healWith100))) ~>
         metrics(logging(profile(massiveDamage))) ~>
-        metrics(logging(profile(healWith100)))
+        metrics(logging(profile(healWith100)))*/
 
     // val charEffect = doubleDamageWith100 ~> damageWith100 ~> damageAndThenHeal100 ~> healAndThenDamage100
 
+    import Logging._
+    val charEffect = Logging("heal {0} gives {1}", healWith100)
 
-    val duration = Duration(500, "millis")
+    val duration = Duration(5, "millis")
     val finalChar: PhysicalCharacter = Await.result(charEffect(char), duration)
 
     println("\nFinal Status....")
